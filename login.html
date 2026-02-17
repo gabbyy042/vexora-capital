@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VEXORA CAPITAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', Arial, sans-serif; background: linear-gradient(135deg, #0B1437 0%, #1a1a2e 100%); 
+               min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .form-container { background: #1a1a2e; padding: 40px; border-radius: 12px; border: 2px solid #FFD700; 
+                          max-width: 450px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h1 { color: #FFD700; text-align: center; margin-bottom: 30px; font-size: 2rem; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; color: #e0e0e0; margin-bottom: 8px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 2px solid #FFD700; border-radius: 6px; background: #0f0f23; 
+                color: #e0e0e0; font-size: 1rem; }
+        input:focus { outline: none; border-color: #FFC700; }
+        .btn { width: 100%; padding: 15px; background: #FFD700; color: #0B1437; border: none; border-radius: 6px; 
+               font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .btn:hover { background: #FFC700; }
+        .link { text-align: center; margin-top: 20px; color: #e0e0e0; }
+        .link a { color: #FFD700; text-decoration: none; }
+        .message { padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; }
+        .error { background: #EF4444; color: white; }
+        .success { background: #10B981; color: white; }
+        .back-home { text-align: center; margin-top: 15px; }
+        .back-home a { color: #FFD700; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Welcome Back</h1>
+        <div id="message"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div class="link">
+            Don't have an account? <a href="register.html">Register</a>
+        </div>
+        <div class="back-home">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const messageEl = document.getElementById('message');
+
+            try {
+                const response = await fetch('backend/login-process.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    messageEl.innerHTML = '<div class="message success">' + data.message + '</div>';
+                    setTimeout(() => window.location.href = data.data.redirect, 1000);
+                } else {
+                    messageEl.innerHTML = '<div class="message error">' + data.message + '</div>';
+                }
+            } catch (error) {
+                messageEl.innerHTML = '<div class="message error">Login failed. Please try again.</div>';
+            }
+        });
+    </script>
+</body>
+</html>

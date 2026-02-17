@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - VEXORA CAPITAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', Arial, sans-serif; background: #0f0f23; color: #e0e0e0; }
+        .navbar { background: #0B1437; padding: 15px 30px; display: flex; justify-content: space-between; 
+                  align-items: center; border-bottom: 2px solid #FFD700; }
+        .logo { color: #FFD700; font-size: 1.5rem; font-weight: 900; }
+        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .card { background: #1a1a2e; padding: 40px; border-radius: 12px; border: 2px solid #FFD700; }
+        h1 { color: #FFD700; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 2px solid #FFD700; border-radius: 6px; 
+                background: #0f0f23; color: #e0e0e0; font-size: 1rem; }
+        .btn { padding: 15px; background: #FFD700; color: #0B1437; border: none; border-radius: 6px; 
+               font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%; }
+        .message { padding: 12px; border-radius: 6px; margin-bottom: 20px; }
+        .success { background: #10B981; color: white; }
+        .error { background: #EF4444; color: white; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">VEXORA CAPITAL</div>
+        <a href="dashboard.html" style="color: #FFD700; text-decoration: none;">← Back to Dashboard</a>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h1>Profile Settings</h1>
+            <div id="message"></div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone">
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country">
+                </div>
+                <button type="submit" class="btn">Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const messageEl = document.getElementById('message');
+
+            try {
+                const response = await fetch('backend/profile-update.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    messageEl.innerHTML = '<div class="message success">' + data.message + '</div>';
+                } else {
+                    messageEl.innerHTML = '<div class="message error">' + data.message + '</div>';
+                }
+            } catch (error) {
+                messageEl.innerHTML = '<div class="message error">Update failed. Please try again.</div>';
+            }
+        });
+    </script>
+</body>
+</html>

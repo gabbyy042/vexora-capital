@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEXORA CAPITAL - Cryptocurrency Investment Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', Arial, sans-serif; background: #0f0f23; color: #e0e0e0; }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+                background: linear-gradient(135deg, #0B1437 0%, #1a1a2e 100%); text-align: center; padding: 20px; }
+        h1 { font-size: 3.5rem; color: #FFD700; margin-bottom: 1rem; font-weight: 900; }
+        .subtitle { font-size: 1.5rem; margin-bottom: 2rem; color: #e0e0e0; }
+        .cta-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .btn { padding: 15px 40px; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; 
+               text-decoration: none; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: #FFD700; color: #0B1437; }
+        .btn-primary:hover { background: #FFC700; transform: translateY(-2px); }
+        .btn-secondary { background: transparent; color: #FFD700; border: 2px solid #FFD700; }
+        .btn-secondary:hover { background: #FFD700; color: #0B1437; }
+
+        .plans { padding: 80px 20px; background: #0B1437; }
+        .plans h2 { text-align: center; font-size: 2.5rem; color: #FFD700; margin-bottom: 3rem; }
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+                      gap: 2rem; max-width: 1200px; margin: 0 auto; }
+        .plan-card { background: #1a1a2e; border: 2px solid #FFD700; border-radius: 12px; padding: 30px; 
+                     text-align: center; transition: all 0.3s; }
+        .plan-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        .plan-name { font-size: 1.8rem; color: #FFD700; margin-bottom: 1rem; }
+        .plan-profit { font-size: 3rem; color: #10B981; font-weight: 900; margin: 1rem 0; }
+        .plan-details { color: #e0e0e0; margin: 0.5rem 0; font-size: 1.1rem; }
+
+        .footer { background: #0B1437; padding: 40px 20px; text-align: center; border-top: 2px solid #FFD700; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .subtitle { font-size: 1.2rem; }
+            .plans h2 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>💎 VEXORA CAPITAL</h1>
+        <p class="subtitle">Professional Cryptocurrency Investment Platform</p>
+        <p style="font-size: 1.2rem; max-width: 600px; margin-bottom: 2rem;">
+            Start earning up to 150% profit on your crypto investments. Secure, transparent, and reliable.
+        </p>
+        <div class="cta-buttons">
+            <a href="register.html" class="btn btn-primary">Get Started</a>
+            <a href="login.html" class="btn btn-secondary">Login</a>
+        </div>
+    </section>
+
+    <section class="plans">
+        <h2>Investment Plans</h2>
+        <div class="plans-grid">
+            <div class="plan-card">
+                <div class="plan-name">Basic</div>
+                <div class="plan-profit">20%</div>
+                <div class="plan-details">Min: $50 | Max: $499</div>
+                <div class="plan-details">Duration: 24 hours</div>
+                <div class="plan-details">5% Referral Bonus</div>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Bronze</div>
+                <div class="plan-profit">35%</div>
+                <div class="plan-details">Min: $500 | Max: $999</div>
+                <div class="plan-details">Duration: 48 hours</div>
+                <div class="plan-details">10% Referral Bonus</div>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Standard</div>
+                <div class="plan-profit">80%</div>
+                <div class="plan-details">Min: $1,000 | Max: $1,999</div>
+                <div class="plan-details">Duration: 92 hours</div>
+                <div class="plan-details">10% Referral Bonus</div>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Gold</div>
+                <div class="plan-profit">100%</div>
+                <div class="plan-details">Min: $2,000 | Max: $2,499</div>
+                <div class="plan-details">Duration: 48 hours</div>
+                <div class="plan-details">10% Referral Bonus</div>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Company Shares</div>
+                <div class="plan-profit">120%</div>
+                <div class="plan-details">Min: $6,000+</div>
+                <div class="plan-details">Duration: 72 hours</div>
+                <div class="plan-details">15% Referral Bonus</div>
+            </div>
+
+            <div class="plan-card">
+                <div class="plan-name">Real Estate</div>
+                <div class="plan-profit">150%</div>
+                <div class="plan-details">Min: $10,000+</div>
+                <div class="plan-details">Duration: 48 hours</div>
+                <div class="plan-details">15% Referral Bonus</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2026 VEXORA CAPITAL. All rights reserved.</p>
+        <p style="margin-top: 10px;">Support: support@vexoracapital.com</p>
+    </footer>
+</body>
+</html>

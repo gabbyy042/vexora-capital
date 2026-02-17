@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - VEXORA CAPITAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', Arial, sans-serif; background: linear-gradient(135deg, #0B1437 0%, #1a1a2e 100%); 
+               min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .form-container { background: #1a1a2e; padding: 40px; border-radius: 12px; border: 2px solid #FFD700; 
+                          max-width: 500px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h1 { color: #FFD700; text-align: center; margin-bottom: 30px; font-size: 2rem; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; color: #e0e0e0; margin-bottom: 8px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 2px solid #FFD700; border-radius: 6px; background: #0f0f23; 
+                color: #e0e0e0; font-size: 1rem; }
+        input:focus { outline: none; border-color: #FFC700; }
+        .btn { width: 100%; padding: 15px; background: #FFD700; color: #0B1437; border: none; border-radius: 6px; 
+               font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .btn:hover { background: #FFC700; }
+        .link { text-align: center; margin-top: 20px; color: #e0e0e0; }
+        .link a { color: #FFD700; text-decoration: none; }
+        .message { padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; }
+        .error { background: #EF4444; color: white; }
+        .success { background: #10B981; color: white; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create Account</h1>
+        <div id="message"></div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" name="phone">
+            </div>
+            <div class="form-group">
+                <label>Country</label>
+                <input type="text" name="country">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required minlength="8">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" required>
+            </div>
+            <div class="form-group">
+                <label>Referral Code (Optional)</label>
+                <input type="text" name="referral_code" id="referralCode">
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <div class="link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Auto-fill referral code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        if (refCode) document.getElementById('referralCode').value = refCode;
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const messageEl = document.getElementById('message');
+
+            try {
+                const response = await fetch('backend/register-process.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    messageEl.innerHTML = `<div class="message success">${data.message}</div>`;
+                    form.reset();
+                    setTimeout(() => window.location.href = 'login.html', 3000);
+                } else {
+                    messageEl.innerHTML = `<div class="message error">${data.message}</div>`;
+                }
+            } catch (error) {
+                messageEl.innerHTML = `<div class="message error">Registration failed. Please try again.</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

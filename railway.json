@@ -1,7 +1,13 @@
 {
   "\$schema": "https://railway.app/railway.schema.json",
   "services": {
-    "mysql": {
+    "web": {
+      "image": "nginx:latest"
+    },
+    "api": {
+      "image": "php:8.1-fpm"
+    },
+    "db": {
       "image": "mysql:8"
     }
   }

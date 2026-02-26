@@ -1,9 +1,12 @@
 <?php
+/**
+ * Backend: User Registration Handler
+ */
 require_once 'config.php';
 require_once 'functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    errorResponse('Invalid request method', 405);
+    jsonResponse(['success' => false, 'message' => 'Invalid request'], 405);
 }
 
 $fullName = sanitize($_POST['full_name'] ?? '');
@@ -12,84 +15,67 @@ $phone = sanitize($_POST['phone'] ?? '');
 $country = sanitize($_POST['country'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirmPassword = $_POST['confirm_password'] ?? '';
-$referralCode = sanitize($_POST['referral_code'] ?? '');
 
+// Validation
 if (empty($fullName) || empty($email) || empty($password)) {
-    errorResponse('All fields are required');
-}
-
-if (!validateEmail($email)) {
-    errorResponse('Invalid email address');
-}
-
-if (strlen($password) < 8) {
-    errorResponse('Password must be at least 8 characters');
+    jsonResponse(['success' => false, 'message' => 'All fields required']);
 }
 
 if ($password !== $confirmPassword) {
-    errorResponse('Passwords do not match');
+    jsonResponse(['success' => false, 'message' => 'Passwords do not match']);
 }
 
+if (strlen($password) < 8) {
+    jsonResponse(['success' => false, 'message' => 'Password must be 8+ characters']);
+}
+
+// Check if email exists
 $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = ?");
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
-    errorResponse('Email already registered');
-}
-
-$referrerId = null;
-if (!empty($referralCode)) {
-    $referrerId = getReferrerByCode($referralCode);
+    jsonResponse(['success' => false, 'message' => 'Email already registered']);
 }
 
 try {
-    $pdo->beginTransaction();
-
-    $passwordHash = hashPassword($password);
-    $userReferralCode = generateReferralCode();
-    $verificationToken = generateToken();
-
+    // Generate tokens
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $referralCode = strtoupper(substr(md5(uniqid()), 0, 8));
+    $verificationToken = bin2hex(random_bytes(32));
+    
+    // Insert user
     $stmt = $pdo->prepare("
         INSERT INTO users 
-        (full_name, email, phone, country, password_hash, referral_code, 
-         verification_token, referred_by, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'unverified')
+        (full_name, email, phone, country, password_hash, referral_code, verification_token, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'unverified')
     ");
-
-    $stmt->execute([
-        $fullName,
-        $email,
-        $phone,
-        $country,
-        $passwordHash,
-        $userReferralCode,
-        $verificationToken,
-        $referrerId
-    ]);
-
-    $newUserId = $pdo->lastInsertId();
-
-    if ($referrerId) {
-        $stmt = $pdo->prepare("
-            INSERT INTO referrals 
-            (referrer_user_id, referred_user_id, commission_rate, status) 
-            VALUES (?, ?, 10, 'pending')
-        ");
-        $stmt->execute([$referrerId, $newUserId]);
-    }
-
-    logActivity($newUserId, null, 'user_registered', "New user registered: {$email}");
-
-    $pdo->commit();
-
-    sendVerificationEmail($newUserId, $email, $verificationToken);
-
-    successResponse('Registration successful! Please check your email to verify your account.', [
+    
+    $stmt->execute([$fullName, $email, $phone, $country, $passwordHash, $referralCode, $verificationToken]);
+    
+    // Send verification email
+    $verifyLink = SITE_URL . "/verify-email.php?token=" . $verificationToken;
+    $subject = "Verify Your Email - " . SITE_NAME;
+    $body = "Click here to verify: <a href='$verifyLink'>$verifyLink</a>";
+    mail($email, $subject, $body, "From: " . SUPPORT_EMAIL);
+    
+    jsonResponse([
+        'success' => true,
+        'message' => 'Registration successful! Check your email to verify.',
         'email' => $email
     ]);
-
+    
 } catch (Exception $e) {
-    $pdo->rollBack();
     error_log("Registration error: " . $e->getMessage());
-    errorResponse('Registration failed. Please try again.');
+    jsonResponse(['success' => false, 'message' => 'Registration failed']);
+}
+
+function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)));
+}
+
+function jsonResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit;
 }
 ?>

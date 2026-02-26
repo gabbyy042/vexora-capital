@@ -1,57 +1,62 @@
 <?php
+/**
+ * Backend: Login Handler
+ */
 require_once 'config.php';
-require_once 'functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    errorResponse('Invalid request method', 405);
+    jsonResponse(['success' => false, 'message' => 'Invalid request'], 405);
 }
 
-$email = sanitize($_POST['email'] ?? '');
+$email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
 if (empty($email) || empty($password)) {
-    errorResponse('Email and password are required');
+    jsonResponse(['success' => false, 'message' => 'Email and password required']);
 }
 
 try {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
-
-    if (!$user) {
-        errorResponse('Invalid email or password');
+    
+    if (!$user || !password_verify($password, $user['password_hash'])) {
+        jsonResponse(['success' => false, 'message' => 'Invalid email or password']);
     }
-
-    if (!verifyPassword($password, $user['password_hash'])) {
-        errorResponse('Invalid email or password');
-    }
-
+    
     if (!$user['email_verified'] || $user['status'] === 'unverified') {
-        errorResponse('Please verify your email before logging in');
+        jsonResponse(['success' => false, 'message' => 'Please verify your email first']);
     }
-
+    
     if ($user['status'] === 'suspended') {
-        errorResponse('Your account has been suspended. Please contact support.');
+        jsonResponse(['success' => false, 'message' => 'Account suspended']);
     }
-
+    
+    // Set session
     session_regenerate_id(true);
-
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['full_name'] = $user['full_name'];
-    $_SESSION['logged_in_at'] = time();
-
+    
+    // Update last login
     $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE user_id = ?");
     $stmt->execute([$user['user_id']]);
-
-    logActivity($user['user_id'], null, 'user_login', 'User logged in');
-
-    successResponse('Login successful', [
-        'redirect' => '../dashboard.html'
+    
+    jsonResponse([
+        'success' => true,
+        'message' => 'Login successful',
+        'redirect' => 'dashboard.html'
     ]);
-
+    
 } catch (Exception $e) {
     error_log("Login error: " . $e->getMessage());
-    errorResponse('Login failed. Please try again.');
+    jsonResponse(['success' => false, 'message' => 'Login failed']);
+}
+
+function jsonResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit;
 }
 ?>

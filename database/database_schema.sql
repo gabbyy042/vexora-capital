@@ -1,8 +1,10 @@
--- Create database
-CREATE DATABASE IF NOT EXISTS vexora_capital CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- VEXORA CAPITAL - Complete Database Schema
+-- Import this file in phpMyAdmin to create all tables
+
+CREATE DATABASE IF NOT EXISTS vexora_capital CHARACTER SET utf8mb4;
 USE vexora_capital;
 
--- USERS TABLE
+-- Users Table
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
@@ -19,45 +21,32 @@ CREATE TABLE users (
     referral_code VARCHAR(20) UNIQUE NOT NULL,
     referred_by INT NULL,
     email_verified BOOLEAN DEFAULT FALSE,
-    phone_verified BOOLEAN DEFAULT FALSE,
-    kyc_verified BOOLEAN DEFAULT FALSE,
     verification_token VARCHAR(255),
     status ENUM('active', 'suspended', 'unverified') DEFAULT 'unverified',
-    reset_token VARCHAR(255),
-    reset_token_expiry TIMESTAMP NULL,
-    two_factor_enabled BOOLEAN DEFAULT FALSE,
-    two_factor_secret VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email),
-    INDEX idx_referral_code (referral_code),
-    INDEX idx_status (status),
-    FOREIGN KEY (referred_by) REFERENCES users(user_id) ON DELETE SET NULL
+    INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
--- DEPOSITS TABLE
+-- Deposits Table
 CREATE TABLE deposits (
     deposit_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     crypto_type ENUM('BTC', 'ETH', 'USDT') NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
-    crypto_amount VARCHAR(50),
     wallet_address VARCHAR(255) NOT NULL,
     tx_hash VARCHAR(255),
-    confirmations INT DEFAULT 0,
-    status ENUM('pending', 'confirmed', 'completed', 'rejected') DEFAULT 'pending',
+    status ENUM('pending', 'completed', 'rejected') DEFAULT 'pending',
     admin_approved_by INT,
-    admin_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    confirmed_at TIMESTAMP NULL,
     approved_at TIMESTAMP NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_status (status),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- WITHDRAWALS TABLE
+-- Withdrawals Table
 CREATE TABLE withdrawals (
     withdrawal_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -69,17 +58,14 @@ CREATE TABLE withdrawals (
     tx_hash VARCHAR(255),
     status ENUM('pending', 'processing', 'completed', 'rejected') DEFAULT 'pending',
     admin_processed_by INT,
-    admin_notes TEXT,
-    rejection_reason TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     processed_at TIMESTAMP NULL,
-    completed_at TIMESTAMP NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_status (status),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- INVESTMENTS TABLE
+-- Investments Table
 CREATE TABLE investments (
     investment_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -93,13 +79,12 @@ CREATE TABLE investments (
     maturity_date TIMESTAMP NOT NULL,
     completed_at TIMESTAMP NULL,
     profit_paid DECIMAL(15,2) DEFAULT 0.00,
-    profit_paid_at TIMESTAMP NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_status (status),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- REFERRALS TABLE
+-- Referrals Table
 CREATE TABLE referrals (
     referral_id INT PRIMARY KEY AUTO_INCREMENT,
     referrer_user_id INT NOT NULL,
@@ -108,47 +93,47 @@ CREATE TABLE referrals (
     total_commission_earned DECIMAL(15,2) DEFAULT 0.00,
     status ENUM('pending', 'active', 'inactive') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    first_deposit_at TIMESTAMP NULL,
     INDEX idx_referrer (referrer_user_id),
+    INDEX idx_referred (referred_user_id),
     FOREIGN KEY (referrer_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_referral (referrer_user_id, referred_user_id)
+    FOREIGN KEY (referred_user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- TRANSACTIONS TABLE
+-- Transactions Table
 CREATE TABLE transactions (
     transaction_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    type ENUM('deposit', 'withdrawal', 'investment', 'profit', 'referral_commission', 'bonus', 'fee', 'adjustment') NOT NULL,
+    type ENUM('deposit', 'withdrawal', 'investment', 'profit', 'referral_commission') NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     balance_before DECIMAL(15,2) NOT NULL,
     balance_after DECIMAL(15,2) NOT NULL,
     description TEXT,
-    reference_type ENUM('deposit', 'withdrawal', 'investment', 'admin_edit') NULL,
-    reference_id INT NULL,
-    status ENUM('pending', 'completed', 'failed', 'cancelled') DEFAULT 'completed',
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'completed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
+    INDEX idx_type (type),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ADMIN USERS TABLE
+-- Admin Users Table
 CREATE TABLE admin_users (
     admin_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(100),
     full_name VARCHAR(100),
-    role ENUM('super_admin', 'admin', 'moderator') DEFAULT 'admin',
+    role ENUM('super_admin', 'admin') DEFAULT 'admin',
     status ENUM('active', 'suspended') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP NULL
+    last_login TIMESTAMP NULL,
+    INDEX idx_username (username)
 ) ENGINE=InnoDB;
 
--- Default admin user (username: Gabbyy042, password: Chukwu1$)
-INSERT INTO admin_users (username, password_hash, full_name, role) 
-VALUES ('Gabbyy042', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin User', 'super_admin');
+-- Insert default admin (Password: Chukwu1$)
+INSERT INTO admin_users (username, password_hash, full_name, role) VALUES
+('Gabbyy042', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin User', 'super_admin');
 
--- ACTIVITY LOGS TABLE
+-- Activity Logs
 CREATE TABLE activity_logs (
     log_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NULL,
@@ -156,37 +141,8 @@ CREATE TABLE activity_logs (
     action VARCHAR(100) NOT NULL,
     description TEXT,
     ip_address VARCHAR(50),
-    user_agent TEXT,
-    metadata JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    INDEX idx_user_id (user_id),
+    INDEX idx_admin_id (admin_id),
+    INDEX idx_action (action)
 ) ENGINE=InnoDB;
-
--- NOTIFICATIONS TABLE
-CREATE TABLE notifications (
-    notification_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    message TEXT NOT NULL,
-    type ENUM('info', 'success', 'warning', 'danger') DEFAULT 'info',
-    link_url VARCHAR(500),
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- SETTINGS TABLE
-CREATE TABLE settings (
-    setting_id INT PRIMARY KEY AUTO_INCREMENT,
-    setting_key VARCHAR(100) UNIQUE NOT NULL,
-    setting_value TEXT,
-    setting_type ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string',
-    description TEXT
-) ENGINE=InnoDB;
-
--- Default settings
-INSERT INTO settings (setting_key, setting_value, setting_type, description) VALUES
-('site_name', 'VEXORA CAPITAL', 'string', 'Website name'),
-('min_deposit', '50', 'number', 'Minimum deposit amount in USD'),
-('min_withdrawal', '50', 'number', 'Minimum withdrawal amount in USD'),
-('withdrawal_fee_percent', '2', 'number', 'Withdrawal fee percentage');

@@ -1,11 +1,13 @@
 <?php
+/**
+ * Verify Email Handler
+ */
 require_once 'config.php';
-require_once 'functions.php';
 
-$token = sanitize($_GET['token'] ?? '');
+$token = $_GET['token'] ?? '';
 
 if (empty($token)) {
-    header('Location: ../login.html?error=invalid_token');
+    header('Location: login.html?error=invalid_token');
     exit;
 }
 
@@ -17,29 +19,26 @@ try {
     ");
     $stmt->execute([$token]);
     $user = $stmt->fetch();
-
+    
     if (!$user) {
-        header('Location: ../login.html?error=invalid_token');
+        header('Location: login.html?error=invalid_token');
         exit;
     }
-
+    
+    // Update user status
     $stmt = $pdo->prepare("
         UPDATE users 
-        SET email_verified = TRUE, 
-            status = 'active', 
-            verification_token = NULL 
+        SET email_verified = TRUE, status = 'active', verification_token = NULL 
         WHERE user_id = ?
     ");
     $stmt->execute([$user['user_id']]);
-
-    logActivity($user['user_id'], null, 'email_verified', 'User verified email');
-
-    header('Location: ../verify-email-success.html');
+    
+    header('Location: login.html?verified=1');
     exit;
-
+    
 } catch (Exception $e) {
-    error_log("Email verification error: " . $e->getMessage());
-    header('Location: ../login.html?error=verification_failed');
+    error_log("Verification error: " . $e->getMessage());
+    header('Location: login.html?error=verification_failed');
     exit;
 }
 ?>

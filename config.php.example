@@ -1,0 +1,57 @@
+<?php
+/**
+ * VEXORA CAPITAL - Configuration Template
+ * 
+ * INSTRUCTIONS:
+ * 1. Copy this file to config.php
+ * 2. Fill in your actual values
+ * 3. Add config.php to .gitignore (NEVER commit to GitHub!)
+ */
+
+// Database Configuration
+define('DB_HOST', 'sql201.infinityfree.com');
+define('DB_NAME', 'if0_12345_vexora_db');
+define('DB_USER', 'if0_12345');
+define('DB_PASS', 'YOUR_PASSWORD_HERE');
+
+// Site Configuration
+define('SITE_URL', 'http://your-domain.com');
+define('SITE_NAME', 'VEXORA CAPITAL');
+define('SUPPORT_EMAIL', 'support@your-domain.com');
+
+// Email Configuration (SMTP)
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USER', 'your-email@gmail.com');
+define('SMTP_PASS', 'your-app-password');
+
+// Cryptocurrency Wallets (YOUR WALLETS!)
+define('BTC_WALLET', 'bc1qz69wrtc6nkrqhxmta0h7jzv6wcut8pshaus3hw');
+define('ETH_WALLET', '0xC8E8029Fe2Ea976394563F7a650f417b4dA5bAfE');
+define('USDT_TRC20_WALLET', 'TGLf3LMQ5FCjk5HuJx7gmmPLVWWkAxgXLD');
+
+// Financial Settings
+define('MIN_DEPOSIT', 50);
+define('MIN_WITHDRAWAL', 50);
+define('WITHDRAWAL_FEE_PERCENT', 2);
+
+// Security Settings
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_lifetime', 1800);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Database Connection
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME,
+        DB_USER,
+        DB_PASS
+    );
+} catch(PDOException $e) {
+    die("Database Connection Failed: " . $e->getMessage());
+}
+?>

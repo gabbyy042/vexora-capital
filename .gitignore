@@ -1,0 +1,43 @@
+# Sensitive Configuration
+config.php
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.sql
+database.db
+*.backup
+
+# Composer/Dependencies
+vendor/
+composer.lock
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE & Editors
+.vscode/
+.idea/
+*.sublime-project
+
+# Logs
+*.log
+error_log
+
+# Cache
+.cache/
+*.cache
+
+# Node
+node_modules/
+package-lock.json
+
+# Testing
+.phpunit.result.cache
+
+# Temporary
+*.tmp
+*.bak
+~*
